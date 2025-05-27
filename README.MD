@@ -113,6 +113,19 @@ You can delete a vector by its key.
 await db.delete(1);
 ```
 
+### Checking if an Embedding Exists
+
+You can check if an embedding exists in the database using its key.
+
+```js
+const keyExists = await db.hasEmbedding(123); // Replace 123 with the key you want to check
+if (keyExists) {
+  console.log("Embedding with key 123 exists.");
+} else {
+  console.log("Embedding with key 123 does not exist.");
+}
+```
+
 ---
 
 ## Experimental: Binary Vectors
