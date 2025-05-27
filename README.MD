@@ -110,7 +110,7 @@ await db.update("1234", {
 You can delete a vector by its key.
 
 ```js
-await db.delete(1);
+await db.delete("1");
 ```
 
 ### Checking if an Embedding Exists
@@ -118,11 +118,11 @@ await db.delete(1);
 You can check if an embedding exists in the database using its key.
 
 ```js
-const keyExists = await db.hasEmbedding(123); // Replace 123 with the key you want to check
+const keyExists = await db.hasEmbedding("123"); // Replace "123" with the key you want to check
 if (keyExists) {
-  console.log("Embedding with key 123 exists.");
+  console.log("Embedding with key '123' exists.");
 } else {
-  console.log("Embedding with key 123 does not exist.");
+  console.log("Embedding with key '123' does not exist.");
 }
 ```
 
@@ -132,7 +132,7 @@ Retrieve all stored embedding keys with:
 
 ```js
 const keys = await db.getAllKeys();
-console.log(keys); // e.g. [1, 2, 3, ...]
+console.log(keys); // e.g. ["1", "2", "3", ...]
 ```
 
 ### Batch Operations
@@ -149,7 +149,7 @@ const items = [
   { text: 'Second item' },
 ];
 const keys = await db.insertBatch(items);
-console.log(keys); // e.g. [1,2]
+console.log(keys); // e.g. ["1","2"]
 ```
 
 #### insertManualBatch (manual vectors)
@@ -168,11 +168,11 @@ const keys = await db.insertManualBatch(manualItems);
 
 ```js
 const manualItemsWithId = [
-  { id: 10, myVectorField: [0.1,0.2,...], metadata: { name: 'A' } },
-  { id: 20, myVectorField: [0.3,0.4,...], metadata: { name: 'B' } },
+  { id: "10", myVectorField: [0.1,0.2,...], metadata: { name: 'A' } },
+  { id: "20", myVectorField: [0.3,0.4,...], metadata: { name: 'B' } },
 ];
 const keysWithId = await db.insertManualBatch(manualItemsWithId);
-console.log(keysWithId); // [10, 20]
+console.log(keysWithId); // ["10", "20"]
 ```
 
 #### updateBatch
@@ -181,8 +181,8 @@ Update multiple records by key:
 
 ```js
 const updates = [
-  { key: 1, text: 'Updated text' },
-  { key: 2, myVectorField: [0.5,0.6,...] },
+  { key: '1', text: 'Updated text' },
+  { key: '2', myVectorField: [0.5,0.6,...] },
 ];
 await db.updateBatch(updates);
 ```
@@ -192,7 +192,7 @@ await db.updateBatch(updates);
 Delete multiple records by key:
 
 ```js
-const toDelete = [1,2,3];
+const toDelete = ['1','2','3'];
 await db.deleteBatch(toDelete);
 ```
 
