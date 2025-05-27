@@ -374,6 +374,19 @@ class EntityDB {
       throw new Error(`Error querying manual vectors: ${error}`);
     }
   }
+
+  // Get all embedding keys
+  async getAllKeys() {
+    try {
+      const db = await this.dbPromise;
+      const transaction = db.transaction("vectors", "readonly");
+      const store = transaction.objectStore("vectors");
+      const keys = await store.getAllKeys();
+      return keys;
+    } catch (error) {
+      throw new Error(`Error getting all embedding keys: ${error}`);
+    }
+  }
 }
 
 // Export EntityDB class

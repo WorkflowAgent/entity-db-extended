@@ -31,5 +31,9 @@ declare module "@babycommando/entity-db-extended" {
       options?: { limit?: number }
     ): Promise<{ [key: string]: any }[]>;
     hasEmbedding(key: number): Promise<boolean>;
+    /**
+     * Get all embedding keys stored in the database
+     */
+    getAllKeys(): Promise<number[]>;
   }
 }
