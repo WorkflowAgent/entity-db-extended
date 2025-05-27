@@ -1,6 +1,6 @@
 {
   "name": "@babycommando/entity-db-extended",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "EntityDB is an in-browser vector database wrapping indexedDB and Transformers.js",
   "main": "src/index.js",
   "types": "src/index.d.ts",
