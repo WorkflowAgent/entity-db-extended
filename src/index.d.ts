@@ -1,6 +1,6 @@
 // src/index.d.ts
 
-declare module "@babycommando/entity-db" {
+declare module "@babycommando/entity-db-extended" {
   export class EntityDB {
     constructor(config: { vectorPath: string; model?: string });
 
