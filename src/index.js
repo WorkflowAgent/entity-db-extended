@@ -210,6 +210,19 @@ class EntityDB {
     await store.delete(key);
   }
 
+  async hasEmbedding(key) {
+    try {
+      const db = await this.dbPromise;
+      const transaction = db.transaction("vectors", "readonly");
+      const store = transaction.objectStore("vectors");
+      const record = await store.get(key);
+      return record !== undefined;
+    } catch (error) {
+      console.error(`Error checking for embedding with key ${key}:`, error);
+      throw new Error(`Failed to check embedding existence for key ${key}: ${error.message}`);
+    }
+  }
+
   // Query vectors by cosine similarity (using a text input that will be converted into embeddings)
   async query(queryText, { limit = 10 } = {}) {
     try {

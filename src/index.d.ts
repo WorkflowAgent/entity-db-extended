@@ -30,5 +30,6 @@ declare module "@babycommando/entity-db" {
       queryVector: number[],
       options?: { limit?: number }
     ): Promise<{ [key: string]: any }[]>;
+    hasEmbedding(key: number): Promise<boolean>;
   }
 }
