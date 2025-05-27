@@ -1,5 +1,5 @@
 {
-  "name": "@babycommando/entity-db",
+  "name": "@babycommando/entity-db-extended",
   "version": "1.0.10",
   "description": "EntityDB is an in-browser vector database wrapping indexedDB and Transformers.js",
   "main": "src/index.js",
@@ -15,6 +15,7 @@
     "entity-db"
   ],
   "author": "babycommando",
+  "contributors": ["vincentwu-limesync"],
   "license": "Apache-2.0",
   "dependencies": {
     "idb": "^8.0.1",
