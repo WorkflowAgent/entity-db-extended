@@ -4,14 +4,26 @@ declare module "@babycommando/entity-db-extended" {
   export class EntityDB {
     constructor(config: { vectorPath: string; model?: string });
 
-    insert(data: { [key: string]: any }): Promise<string>;
-    insertBinary(data: { [key: string]: any }): Promise<string>;
-    insertManualVectors(data: { [key: string]: any }): Promise<string>;
+    /**
+     * Insert a record; 'id' (string) is required
+     */
+    insert(data: { id: string; [key: string]: any }): Promise<string>;
+    /**
+     * Insert binary record; 'id' (string) is required
+     */
+    insertBinary(data: { id: string; [key: string]: any }): Promise<string>;
+    /**
+     * Insert manual vectors; 'id' (string) is required
+     */
+    insertManualVectors(data: { id: string; [key: string]: any }): Promise<string>;
     /**
      * Batch insert manual vectors (no embedding generation)
      * @param dataArray Array of manual vector data objects
      */
-    insertManualBatch(dataArray: { [key: string]: any }[]): Promise<string[]>;
+    /**
+     * Batch insert manual vectors; each object must include 'id'
+     */
+    insertManualBatch(dataArray: { id: string; [key: string]: any }[]): Promise<string[]>;
 
     update(key: string, data: { [key: string]: any }): Promise<void>;
     delete(key: string): Promise<void>;
@@ -41,10 +53,9 @@ declare module "@babycommando/entity-db-extended" {
      */
     getAllKeys(): Promise<string[]>;
     /**
-     * Batch insert data (auto embedding or manual vectors)
-     * @param dataArray Array of data objects to insert
+     * Batch insert data; each object must include 'id'
      */
-    insertBatch(dataArray: { [key: string]: any }[]): Promise<string[]>;
+    insertBatch(dataArray: { id: string; [key: string]: any }[]): Promise<string[]>;
     /**
      * Batch update existing vectors
      * @param updates Array of objects with key and data fields

@@ -59,7 +59,9 @@ const db = new EntityDB({
 You can insert data by simply passing a text field. The library will automatically generate embeddings using the specified transformer model.
 
 ```js
+// 'id' is now required (string key)
 await db.insert({
+  id: "item1",
   text: "This is a sample text to embed",
 });
 ```
@@ -69,9 +71,10 @@ await db.insert({
 If you already have precomputed vectors, you can insert them directly into the database.
 
 ```js
+// 'id' is now required (string key)
 await db.insertManualVectors({
-  text: "Another sample",
-  embedding: [0.1, 0.2, 0.3, ...] // your precomputed embedding
+  id: "item2",
+  vector: [0.1, 0.2, 0.3, ...] // your precomputed embedding vector
 });
 ```
 
@@ -145,11 +148,11 @@ Insert an array of data objects (with text fields) in one go:
 
 ```js
 const items = [
-  { text: 'First item' },
-  { text: 'Second item' },
+  { id: "item1", text: 'First item' },
+  { id: "item2", text: 'Second item' },
 ];
 const keys = await db.insertBatch(items);
-console.log(keys); // e.g. ["1","2"]
+console.log(keys); // e.g. ["item1","item2"]
 ```
 
 #### insertManualBatch (manual vectors)
@@ -158,8 +161,8 @@ Insert precomputed vectors without generating embeddings:
 
 ```js
 const manualItems = [
-  { myVectorField: [0.1,0.2,...], metadata: { name: 'A' } },
-  { myVectorField: [0.3,0.4,...], metadata: { name: 'B' } },
+  { id: "item3", vector: [0.1,0.2,...], metadata: { name: 'A' } },
+  { id: "item4", vector: [0.3,0.4,...], metadata: { name: 'B' } },
 ];
 const keys = await db.insertManualBatch(manualItems);
 ```
@@ -168,8 +171,8 @@ const keys = await db.insertManualBatch(manualItems);
 
 ```js
 const manualItemsWithId = [
-  { id: "10", myVectorField: [0.1,0.2,...], metadata: { name: 'A' } },
-  { id: "20", myVectorField: [0.3,0.4,...], metadata: { name: 'B' } },
+  { id: "10", vector: [0.1,0.2,...], metadata: { name: 'A' } },
+  { id: "20", vector: [0.3,0.4,...], metadata: { name: 'B' } },
 ];
 const keysWithId = await db.insertManualBatch(manualItemsWithId);
 console.log(keysWithId); // ["10", "20"]
@@ -182,7 +185,7 @@ Update multiple records by key:
 ```js
 const updates = [
   { key: '1', text: 'Updated text' },
-  { key: '2', myVectorField: [0.5,0.6,...] },
+  { key: '2', vector: [0.5,0.6,...] },
 ];
 await db.updateBatch(updates);
 ```
@@ -218,6 +221,7 @@ Note: to query over binarized vectors, use _queryBinary_ or _queryBinarySIMD_.
 
 ```js
 await db.insertBinary({
+  id: "item5",
   text: "This is a sample text to embed and binarize",
 });
 ```

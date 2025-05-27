@@ -117,10 +117,8 @@ class EntityDB {
     const db = await openDB("EntityDB", 1, {
       upgrade(db) {
         if (!db.objectStoreNames.contains("vectors")) {
-          db.createObjectStore("vectors", {
-            keyPath: "id",
-            autoIncrement: true,
-          });
+          // Require manual id, disable autoIncrement
+          db.createObjectStore("vectors", { keyPath: "id" });
         }
       },
     });
@@ -130,6 +128,9 @@ class EntityDB {
   // Insert data by generating embeddings from text
   async insert(data) {
     try {
+      if (data.id == null) {
+        throw new Error('ID is required for insert');
+      }
       // Generate embedding if text is provided
       let embedding = data[this.vectorPath];
       if (data.text) {
@@ -149,6 +150,9 @@ class EntityDB {
 
   async insertBinary(data) {
     try {
+      if (data.id == null) {
+        throw new Error('ID is required for binary insert');
+      }
       let embedding = data[this.vectorPath];
       if (data.text) {
         embedding = await getEmbeddingFromText(data.text, this.model);
@@ -181,6 +185,9 @@ class EntityDB {
   // Insert manual vectors (no embedding generation, just insert provided vectors)
   async insertManualVectors(data) {
     try {
+      if (data.id == null) {
+        throw new Error('ID is required for manual vectors insert');
+      }
       const db = await this.dbPromise;
       const transaction = db.transaction("vectors", "readwrite");
       const store = transaction.objectStore("vectors");
@@ -199,7 +206,32 @@ class EntityDB {
     const store = tx.objectStore("vectors");
     const keys = [];
     for (const data of dataArray) {
+      if (data.id == null) {
+        throw new Error('ID is required for manual batch insert');
+      }
       const embedding = data[this.vectorPath];
+      const record = { vector: embedding, ...data };
+      const key = await store.add(record);
+      keys.push(key);
+    }
+    await tx.done;
+    return keys;
+  }
+
+  // Batch insert data (auto embedding or manual vector)
+  async insertBatch(dataArray) {
+    const db = await this.dbPromise;
+    const tx = db.transaction("vectors", "readwrite");
+    const store = tx.objectStore("vectors");
+    const keys = [];
+    for (const data of dataArray) {
+      if (data.id == null) {
+        throw new Error('ID is required for batch insert');
+      }
+      let embedding = data[this.vectorPath];
+      if (data.text) {
+        embedding = await getEmbeddingFromText(data.text, this.model);
+      }
       const record = { vector: embedding, ...data };
       const key = await store.add(record);
       keys.push(key);
@@ -402,25 +434,6 @@ class EntityDB {
     } catch (error) {
       throw new Error(`Error getting all embedding keys: ${error}`);
     }
-  }
-
-  // Batch insert data (auto embedding or manual vector)
-  async insertBatch(dataArray) {
-    const db = await this.dbPromise;
-    const tx = db.transaction("vectors", "readwrite");
-    const store = tx.objectStore("vectors");
-    const keys = [];
-    for (const data of dataArray) {
-      let embedding = data[this.vectorPath];
-      if (data.text) {
-        embedding = await getEmbeddingFromText(data.text, this.model);
-      }
-      const record = { vector: embedding, ...data };
-      const key = await store.add(record);
-      keys.push(key);
-    }
-    await tx.done;
-    return keys;
   }
 
   // Batch update existing vectors
