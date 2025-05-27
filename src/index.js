@@ -192,6 +192,22 @@ class EntityDB {
     }
   }
 
+  // Batch insert manual vectors (no embedding generation)
+  async insertManualBatch(dataArray) {
+    const db = await this.dbPromise;
+    const tx = db.transaction("vectors", "readwrite");
+    const store = tx.objectStore("vectors");
+    const keys = [];
+    for (const data of dataArray) {
+      const embedding = data[this.vectorPath];
+      const record = { vector: embedding, ...data };
+      const key = await store.add(record);
+      keys.push(key);
+    }
+    await tx.done;
+    return keys;
+  }
+
   // Update an existing vector in the database
   async update(key, data) {
     const db = await this.dbPromise;
@@ -386,6 +402,49 @@ class EntityDB {
     } catch (error) {
       throw new Error(`Error getting all embedding keys: ${error}`);
     }
+  }
+
+  // Batch insert data (auto embedding or manual vector)
+  async insertBatch(dataArray) {
+    const db = await this.dbPromise;
+    const tx = db.transaction("vectors", "readwrite");
+    const store = tx.objectStore("vectors");
+    const keys = [];
+    for (const data of dataArray) {
+      let embedding = data[this.vectorPath];
+      if (data.text) {
+        embedding = await getEmbeddingFromText(data.text, this.model);
+      }
+      const record = { vector: embedding, ...data };
+      const key = await store.add(record);
+      keys.push(key);
+    }
+    await tx.done;
+    return keys;
+  }
+
+  // Batch update existing vectors
+  async updateBatch(updates) {
+    const db = await this.dbPromise;
+    const tx = db.transaction("vectors", "readwrite");
+    const store = tx.objectStore("vectors");
+    for (const { key, ...data } of updates) {
+      const vector = data[this.vectorPath];
+      const updatedData = { ...data, [store.keyPath]: key, vector };
+      await store.put(updatedData);
+    }
+    await tx.done;
+  }
+
+  // Batch delete by keys
+  async deleteBatch(keys) {
+    const db = await this.dbPromise;
+    const tx = db.transaction("vectors", "readwrite");
+    const store = tx.objectStore("vectors");
+    for (const key of keys) {
+      await store.delete(key);
+    }
+    await tx.done;
   }
 }
 

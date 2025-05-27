@@ -15,19 +15,19 @@
 To install **EntityDB** in your project, run:
 
 ```bash
-npm install @babycommando/entity-db
+npm install @babycommando/entity-db-extended
 ```
 
 ```bash
-yarn add @babycommando/entity-db
+yarn add @babycommando/entity-db-extended
 ```
 
 ```bash
-pnpm add @babycommando/entity-db
+pnpm add @babycommando/entity-db-extended
 ```
 
 ```bash
-bun add @babycommando/entity-db
+bun add @babycommando/entity-db-extended
 ```
 
 ## Features
@@ -45,7 +45,7 @@ bun add @babycommando/entity-db
 ### Importing the Library
 
 ```js
-import { EntityDB } from "@babycommando/entity-db";
+import { EntityDB } from "@babycommando/entity-db-extended";
 
 // Initialize the VectorDB instance
 const db = new EntityDB({
@@ -124,6 +124,76 @@ if (keyExists) {
 } else {
   console.log("Embedding with key 123 does not exist.");
 }
+```
+
+### Getting All Embedding Keys
+
+Retrieve all stored embedding keys with:
+
+```js
+const keys = await db.getAllKeys();
+console.log(keys); // e.g. [1, 2, 3, ...]
+```
+
+### Batch Operations
+
+Perform multiple inserts, updates, or deletions in a single transaction to improve performance.
+
+#### insertBatch (auto embedding)
+
+Insert an array of data objects (with text fields) in one go:
+
+```js
+const items = [
+  { text: 'First item' },
+  { text: 'Second item' },
+];
+const keys = await db.insertBatch(items);
+console.log(keys); // e.g. [1,2]
+```
+
+#### insertManualBatch (manual vectors)
+
+Insert precomputed vectors without generating embeddings:
+
+```js
+const manualItems = [
+  { myVectorField: [0.1,0.2,...], metadata: { name: 'A' } },
+  { myVectorField: [0.3,0.4,...], metadata: { name: 'B' } },
+];
+const keys = await db.insertManualBatch(manualItems);
+```
+
+#### Example with manual IDs (set custom keyPath):
+
+```js
+const manualItemsWithId = [
+  { id: 10, myVectorField: [0.1,0.2,...], metadata: { name: 'A' } },
+  { id: 20, myVectorField: [0.3,0.4,...], metadata: { name: 'B' } },
+];
+const keysWithId = await db.insertManualBatch(manualItemsWithId);
+console.log(keysWithId); // [10, 20]
+```
+
+#### updateBatch
+
+Update multiple records by key:
+
+```js
+const updates = [
+  { key: 1, text: 'Updated text' },
+  { key: 2, myVectorField: [0.5,0.6,...] },
+];
+await db.updateBatch(updates);
+```
+
+#### deleteBatch
+
+Delete multiple records by key:
+
+```js
+const toDelete = [1,2,3];
+await db.deleteBatch(toDelete);
 ```
 
 ---
