@@ -244,14 +244,41 @@ class EntityDB {
     return keys;
   }
 
-  // Update an existing vector in the database
+  // Update an existing vector in the database (partial merge to preserve vector)
   async update(key, data) {
     const db = await this.dbPromise;
     const transaction = db.transaction("vectors", "readwrite");
     const store = transaction.objectStore("vectors");
-    const vector = data[this.vectorPath];
-    const updatedData = { ...data, [store.keyPath]: key, vector };
+    // Fetch existing record
+    const existing = await store.get(key);
+    if (!existing) {
+      throw new Error(`Cannot update non-existent key ${key}`);
+    }
+    // Determine new vector: use provided or preserve existing
+    const newVec = data[this.vectorPath] ?? data.vector;
+    const vecToStore = Array.isArray(newVec) && newVec.length > 0 ? newVec : existing.vector;
+    // Merge all fields, ensure key and vector
+    const updatedData = { ...existing, ...data, [store.keyPath]: key, vector: vecToStore };
     await store.put(updatedData);
+  }
+
+  // Batch update existing vectors
+  async updateBatch(updates) {
+    const db = await this.dbPromise;
+    const tx = db.transaction("vectors", "readwrite");
+    const store = tx.objectStore("vectors");
+    for (const { key, ...data } of updates) {
+      // Load existing record
+      const existing = await store.get(key);
+      if (!existing) continue;
+      // Determine vector to preserve or update
+      const newVec = data[this.vectorPath] ?? data.vector;
+      const vecToStore = Array.isArray(newVec) && newVec.length > 0 ? newVec : existing.vector;
+      // Merge and put
+      const merged = { ...existing, ...data, [store.keyPath]: key, vector: vecToStore };
+      await store.put(merged);
+    }
+    await tx.done;
   }
 
   // Delete a vector by key
@@ -479,19 +506,6 @@ class EntityDB {
     } catch (error) {
       throw new Error(`Error getting all embedding keys: ${error}`);
     }
-  }
-
-  // Batch update existing vectors
-  async updateBatch(updates) {
-    const db = await this.dbPromise;
-    const tx = db.transaction("vectors", "readwrite");
-    const store = tx.objectStore("vectors");
-    for (const { key, ...data } of updates) {
-      const vector = data[this.vectorPath];
-      const updatedData = { ...data, [store.keyPath]: key, vector };
-      await store.put(updatedData);
-    }
-    await tx.done;
   }
 
   // Batch delete by keys
