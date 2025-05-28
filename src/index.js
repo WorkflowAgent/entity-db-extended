@@ -268,7 +268,16 @@ class EntityDB {
       const transaction = db.transaction("vectors", "readonly");
       const store = transaction.objectStore("vectors");
       const record = await store.get(key);
-      return record !== undefined;
+      // No record => no embedding
+      if (!record) {
+        return false;
+      }
+      // Check actual vector field
+      const vec = record[this.vectorPath] ?? record.vector;
+      if (!Array.isArray(vec) || vec.length === 0) {
+        return false;
+      }
+      return true;
     } catch (error) {
       console.error(`Error checking for embedding with key ${key}:`, error);
       throw new Error(`Failed to check embedding existence for key ${key}: ${error.message}`);
@@ -415,10 +424,20 @@ class EntityDB {
       const vectors = await store.getAll(); // Retrieve all vectors
 
       // Calculate cosine similarity for each vector and sort by similarity
-      const similarities = vectors.map((entry) => {
-        const similarity = cosineSimilarity(queryVector, entry.vector);
-        return { ...entry, similarity };
-      });
+      const similarities = [];
+      for (const entry of vectors) {
+        // Try dynamic field, fallback to 'vector'
+        let vecB = entry[this.vectorPath];
+        if (!Array.isArray(vecB)) {
+          vecB = entry.vector;
+        }
+        if (!Array.isArray(vecB)) {
+          console.warn(`[EntityDB] Skipping entry ${entry.id}: missing vector`);
+          continue;
+        }
+        const similarity = cosineSimilarity(queryVector, vecB);
+        similarities.push({ ...entry, similarity });
+      }
 
       similarities.sort((a, b) => b.similarity - a.similarity); // Sort by similarity (descending)
       return similarities.slice(0, limit); // Return the top N results based on limit
