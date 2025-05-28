@@ -284,6 +284,28 @@ class EntityDB {
     }
   }
 
+  /**
+   * Check existence of multiple embeddings.
+   * @param keys Array of keys to check.
+   * @returns Mapping from key to boolean indicating non-empty vector existence.
+   */
+  async hasEmbeddings(keys) {
+    const db = await this.dbPromise;
+    const transaction = db.transaction("vectors", "readonly");
+    const store = transaction.objectStore("vectors");
+    const result = {};
+    for (const key of keys) {
+      const record = await store.get(key);
+      if (record) {
+        const vec = record[this.vectorPath] ?? record.vector;
+        result[key] = Array.isArray(vec) && vec.length > 0;
+      } else {
+        result[key] = false;
+      }
+    }
+    return result;
+  }
+
   // Query vectors by cosine similarity (using a text input that will be converted into embeddings)
   async query(queryText, { limit = 10 } = {}) {
     try {

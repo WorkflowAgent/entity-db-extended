@@ -54,6 +54,12 @@ declare module "@babycommando/entity-db-extended" {
     ): Promise<{ [key: string]: any }[]>;
     hasEmbedding(key: string): Promise<boolean>;
     /**
+     * Check existence of multiple embeddings.
+     * @param keys Array of keys to check.
+     * @returns Mapping from key to boolean indicating non-empty vector existence.
+     */
+    hasEmbeddings(keys: string[]): Promise<{ [key: string]: boolean }>;
+    /**
      * Get all embedding keys stored in the database
      */
     getAllKeys(): Promise<string[]>;
