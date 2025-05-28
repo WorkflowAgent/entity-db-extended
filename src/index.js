@@ -15,6 +15,9 @@ env.localModelPath = "/huggingface";
 const defaultModel = "Xenova/all-MiniLM-L6-v2";
 const pipePromise = pipeline("feature-extraction", defaultModel);
 
+// Default IndexedDB name
+const defaultDBName = 'EntityDB';
+
 // Cosine similarity function
 const cosineSimilarity = (vecA, vecB) => {
   const dotProduct = vecA.reduce(
@@ -106,7 +109,8 @@ async function loadWasm() {
 }
 
 class EntityDB {
-  constructor({ vectorPath, model = defaultModel }) {
+  constructor({ dbName = defaultDBName, vectorPath, model = defaultModel }) {
+    this.dbName = dbName;
     this.vectorPath = vectorPath;
     this.model = model;
     this.dbPromise = this._initDB();
@@ -114,7 +118,7 @@ class EntityDB {
 
   // Initialize the IndexedDB
   async _initDB() {
-    const db = await openDB("EntityDB", 1, {
+    const db = await openDB(this.dbName, 1, {
       upgrade(db) {
         if (!db.objectStoreNames.contains("vectors")) {
           // Require manual id, disable autoIncrement

@@ -2,7 +2,12 @@
 
 declare module "@babycommando/entity-db-extended" {
   export class EntityDB {
-    constructor(config: { vectorPath: string; model?: string });
+    /**
+     * @param config.dbName Optional name for IndexedDB (defaults to 'EntityDB')
+     * @param config.vectorPath Field key for storing embeddings
+     * @param config.model Optional transformer model identifier
+     */
+    constructor(config: { dbName?: string; vectorPath: string; model?: string });
 
     /**
      * Insert a record; 'id' (string) is required

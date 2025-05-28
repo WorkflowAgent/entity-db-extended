@@ -48,9 +48,14 @@ bun add @babycommando/entity-db-extended
 import { EntityDB } from "@babycommando/entity-db-extended";
 
 // Initialize the VectorDB instance
+// You can optionally specify a custom IndexedDB name via `dbName` (defaults to 'EntityDB')
 const db = new EntityDB({
-  vectorPath: "db_name",
-  model: "Xenova/all-MiniLM-L6-v2", // a HuggingFace embeddings model
+  // Optional: custom database name
+  dbName: "myCustomDB",
+  // Field key where embeddings are stored
+  vectorPath: "vector",
+  // Optional: HuggingFace embeddings model
+  model: "Xenova/all-MiniLM-L6-v2",
 });
 ```
 
